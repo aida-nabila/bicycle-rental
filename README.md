@@ -62,5 +62,14 @@ BicycleRentalSystem/<br>
 4. **Access the System** <br>
 Open a browser and visit: http://localhost:8080/BicycleRental/
 
+## 🔮 Future Improvements
+Here are some planned enhancements for the Bicycle Rental System:
+
+- **Live GPS Tracking** – Implement live bicycle tracking for real-time location updates.
+- **Admin Panel** – Implement an admin dashboard to manage users, bicycles, and rentals.
+- **Payment Integration** – Enable secure online payment processing for rentals.
+- **Forgot Password Feature** – Add password recovery functionality for users.
+- **Enhanced Security Features** – Improve authentication with OAuth or biometric login.
+
 ## License
 This project is for educational purposes and follows university guidelines. Redistribution without permission is prohibited.
