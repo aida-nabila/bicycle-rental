@@ -70,6 +70,3 @@ Here are some planned enhancements for the Bicycle Rental System:
 - **Payment Integration** – Enable secure online payment processing for rentals.
 - **Forgot Password Feature** – Add password recovery functionality for users.
 - **Enhanced Security Features** – Improve authentication with OAuth or biometric login.
-
-## License
-This project is for educational purposes and follows university guidelines. Redistribution without permission is prohibited.
