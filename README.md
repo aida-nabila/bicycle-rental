@@ -25,14 +25,14 @@ The **Bicycle Rental System** is a web-based application developed using **JSP (
 ## Project Structure
 
 BicycleRentalSystem/<br>
-├── **build/** → Compiled files<br>
-├── **dist/** → Distribution folder<br>
-├── **lib/** → Libraries and dependencies<br>
-├── **nbproject/** → NetBeans project files<br>
-├── **src/** → Java source files (Servlets, Database, Models)<br>
-├── **test/** → Test files<br>
-├── **web/** → Web application files (JSP, CSS, JS)<br>
-└── **build.xml** → Apache Ant build file<br>
+├── build/ # Compiled files<br>
+├── dist/ # Distribution folder<br>
+├── lib/ # Libraries and dependencies<br>
+├── nbproject/ # NetBeans project files<br>
+├── src/ # Java source files (Servlets, Database, Models)<br>
+├── test/ # Test files<br>
+├── web/ # Web application files (JSP, CSS, JS)<br>
+└── build.xml # Apache Ant build file<br>
 
 
 ## Installation & Setup
@@ -62,7 +62,7 @@ BicycleRentalSystem/<br>
 4. **Access the System** <br>
 Open a browser and visit: http://localhost:8080/BicycleRental/
 
-## ദ്ദി •⩊• ) Future Improvements 
+## Future Improvements 
 Here are some planned enhancements for the Bicycle Rental System:
 
 - **Live GPS Tracking** – Implement live bicycle tracking for real-time location updates.
