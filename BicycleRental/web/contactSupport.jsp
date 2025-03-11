@@ -1,9 +1,3 @@
-<%-- 
-    Document   : contactSupport
-    Created on : 29 Jan 2025, 4:32:05 am
-    Author     : User
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,24 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Support</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to existing CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="contact-support-page">
-<jsp:include page="headerver3.jsp"/>
-    <!-- Breadcrumb Navigation (Using existing styles) -->
+
+    <!-- Header -->
+    <jsp:include page="headerver3.jsp"/>
+
+    <!-- Breadcrumb Navigation -->
     <div class="support-container">
         <div class="breadcrumb">
             <a href="support.jsp" class="support-title">Support</a>
-            <img src="img/arrow.png" alt=">" /> 
+            <img src="img/arrow.png" alt="Arrow Icon">
             <span class="faq-title">Contact Support</span>
         </div>
     </div>
 
-    <!-- Page Title -->
-    <h1 class="contact-heading">What’s the issue?</h1>
-    <p class="contact-description">
-        Please provide details about your problem so we can assist you effectively.
-    </p>
+    <!-- Page Title & Description -->
+    <h1>What’s the issue?</h1>
+    <p>Please provide details about your problem so we can assist you effectively.</p>
 
     <!-- Support Form -->
     <form class="contact-support-form" action="SubmitSupportServlet" method="POST" enctype="multipart/form-data">
@@ -51,8 +46,8 @@
             <label for="image-upload" class="contact-upload-box">
                 <span>+</span>
             </label>
-            <input type="file" id="image-upload" name="image" accept="image/*" style="display: none;">
-            <p class="contact-upload-text">Add photos</p>
+            <input type="file" id="image-upload" name="image" accept="image/*" hidden>
+            <p>Add photos</p>
         </div>
 
         <!-- Submit Button -->
@@ -60,17 +55,12 @@
     </form>
 
     <!-- Show Popup if Report is Submitted -->
-    <%
-        String success = request.getParameter("success");
-        if ("true".equals(success)) {
-    %>
+    <% if ("true".equals(request.getParameter("success"))) { %>
         <script>
             alert("Report submitted\n\nYour report has been successfully submitted.");
             window.location.href = "contactSupport.jsp"; // Redirect to remove success param
         </script>
-    <%
-        }
-    %>
+    <% } %>
 
 </body>
 </html>

@@ -21,12 +21,8 @@ body {
 
 /* Focus outline styling for buttons */
 button:focus-visible {
-    outline: 2px solid #4a90e2 !important;  /* Adds a blue outline on focus for accessibility */
-    outline: -webkit-focus-ring-color auto 5px !important;  /* Specific to Webkit browsers */
-}
-
-a {
-    color: black;
+    outline: 2px solid #4a90e2 !important;
+    outline: -webkit-focus-ring-color auto 5px !important;
 }
 
 nav {
@@ -226,39 +222,37 @@ input[type="password"]::-webkit-textfield-decoration-container {
 
 .actions {
     display: flex;
-    justify-content: space-between; /* Keep "Show password" on the left, "Forgot Password?" on the right */
-    align-items: center; /* Ensure both are vertically centered */
-    margin-top: 5px; /* Space from password input */
-    width: 100%; /* Ensure full width */
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+    width: 100%;
 }
 
 .show-password {
     display: flex;
     align-items: center;
-    gap: 5px; /* Add spacing between checkbox and label text */
+    gap: 5px;
 }
 
-.forgot-password {
-    margin-left: auto; /* Pushes it to the right */
-    text-decoration: none;
-    color: #0066cc;
+.forgot-password { 
+    text-decoration: none !important;
+    color: black !important;
+    font-weight: normal; /* Ensures it's not bold */
 }
 
-.forgot-password:hover {
-    text-decoration: underline;
+.forgot-password:hover, .forgot-password:visited, .forgot-password:active, .forgot-password:focus {
+    text-decoration: none !important;
+    color: black !important;
 }
 
-
-
-/* Login-Style */
-
+/* Login */
 .login-container {
     width: 400px;
     margin: 90px auto;
-    padding: 10px;
-    border-radius: 20px;
+    padding: 18px;
+    border-radius: 10px;
     background: rgba(238, 238, 238, 0.25);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
@@ -282,7 +276,6 @@ input[type="password"]::-webkit-textfield-decoration-container {
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
     background: #f9f9f9;
 }
 
@@ -311,18 +304,27 @@ input[type="password"]::-webkit-textfield-decoration-container {
     font-weight: bold;
 }
 
-.login-container a:hover {
-    text-decoration: underline;
+.signup-text { 
+    text-decoration: none !important;
+    color: black !important;
+    background-color: #B6FF65;
+    font-weight: normal; /* Ensures it's not bold */
 }
 
-/* Sign-up Form Styling */
+.signup-text:hover, .signup-text:visited, .signup-text:active, .signup-text:focus {
+    text-decoration: none !important;
+    color: black !important;
+    background-color: #B6FF65;
+}
+
+/* Sign up */
 .signup-container {
     width: 400px;
     margin: 90px auto;
-    padding: 10px;
-    border-radius: 20px;
+    padding: 18px;
+    border-radius: 10px;
     background: rgba(238, 238, 238, 0.25);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
@@ -346,7 +348,6 @@ input[type="password"]::-webkit-textfield-decoration-container {
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
     background: #f9f9f9;
 }
 
@@ -396,8 +397,40 @@ input[type="password"]::-webkit-textfield-decoration-container {
     text-decoration: underline;
 }
 
-/* Rental Styling */
+.login-text { 
+    text-decoration: none !important;
+    color: black !important;
+    background-color: #B6FF65;
+    font-weight: normal; /* Ensures it's not bold */
+}
 
+.login-text:hover, .login-text:visited, .login-text:active, .login-text:focus {
+    text-decoration: none !important;
+    color: black !important;
+    background-color: #B6FF65;
+}
+
+/* Password Hint Styling */
+.password-hint {
+    font-size: 14px;
+    margin-top: 5px;
+    padding: 8px;
+    border-radius: 5px;
+    color: #dc3545; /* Default red for weak password */
+    background-color: #ffe6e6; /* Light red background */
+    display: none;
+    width: fit-content;
+    max-width: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+/* When password is strong */
+.password-hint.strong {
+    color: #28a745; /* Green for strong password */
+    background-color: #e6ffe6; /* Light green background */
+}
+
+/* Rental */
 .rental-container {
     width: 350px;
     margin: auto;
@@ -537,7 +570,7 @@ input[type="text"] {
 }
 
 .summary-group input {
-    flex:0.6; /* Makes input take up more space */
+    flex:0.6;
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -655,8 +688,7 @@ input[type="text"] {
     background-color: #4d4d4d;
 }
 
-/* SUPPORT PAGE */
-
+/* Support Page */
 .support-page {
     font-family: 'Roboto Mono', monospace;
     background: white;
@@ -676,7 +708,7 @@ input[type="text"] {
     text-align: left;
     position: relative;
     padding: 40px 70px;
-    margin: 0 auto; /* Centers the container horizontally */
+    margin: 0 auto;
 }
 
 .support-title {
@@ -745,18 +777,13 @@ input[type="text"] {
 }
 
 .help-title {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
-    text-align: center;
-    margin-top: 60px;
-}
-
-.help-text {
-    font-size: 14px;
-    font-weight: 400;
-    color: black;
-    text-align: center;
-    margin-bottom: 30px;
+    background: #B6FF65;
+    padding: 5px 10px;
+    display: inline-block;
+    border-radius: 5px;
+    margin-bottom: 10px;
 }
 
 .contact-support {
@@ -886,7 +913,6 @@ input[type="text"] {
     height: 50px;
     border-radius: 6px;
     border: 1.5px solid #616161;
-    font-size: 14px;
     font-weight: 700;
     color: #616161;
     padding: 10px;
@@ -936,34 +962,214 @@ input[type="text"] {
     border: none;
 }
 
-/* HOME PAGE */
+/* Homepage */
+.home {
+    background-color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.home h2{
+    background-color: #B6FF65;
+    display: inline-block;
+    padding: 2px 5px;
+}
+
+.quote {
+    background-color: #F3F3F3;
+}
+
+/* Intro Box */
+.intro-section {
+    position: relative;
+    width: 100%;
+}
+
+.intro-section img {
+    width: 100%;
+    height: auto;
+}
 
 .intro-box {
-    background-color: black;
+    position: absolute;
+    top: 25%;
+    left: 25%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
+    background-color: black;
     padding: 20px;
     text-align: center;
+    border-radius: 10px;
+    width: 600px;
+    height: 350px;
+}
+
+.intro-box h1 {
+    font-size: 48px;
+    font-weight: bold;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    text-align: left; 
+}
+
+.intro-box p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    text-align: left; 
+}
+
+.rent-container, .home-signup-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .rent-now {
-    color: green;
+    margin-left: 20px;
+    color: #B6FF65;
     text-decoration: none;
-    font-weight: bold;
-}
-.rent-now:hover {
-    text-decoration: underline;
+    transition: transform 0.3s ease;
 }
 
+.signup-now {
+    margin-left: 20px;
+    color: black;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
 
-.center-text {
+.arrow-icon img {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+.rent-container:hover .rent-now, .home-signup-container:hover .signup-now {
+    transform: translateX(5px);
+}
+
+.rent-container:hover .arrow-icon img, .home-signup-container:hover .arrow-icon img {
+    transform: translateX(5px);
+}
+
+/* Section Styling */
+.section {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
     text-align: center;
+    margin-bottom: 40px;
+}
+
+.gray-background-small {
+    background-color: #f1f1f1;
+    padding: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 40px;
+}
+
+/* Flex Container */
+.flex-container {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px 20px;
 }
 
 .bordered-box {
-    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 25px;
+    border-radius: 12px;
+    width: 48%;
+    text-align: center;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/*payment styling*/
+.bordered-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.bordered-box img {
+    width: 100%;
+    max-width: 250px;
+    border-radius: 10px;
+}
+
+.bordered-box h3 {
+    margin-top: 15px;
+    font-size: 1.6rem;
+    color: #333;
+}
+
+.bordered-box p {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .flex-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .bordered-box {
+        width: 90%;
+        margin-bottom: 20px;
+    }
+
+    .intro-box h1 {
+        font-size: 2rem;
+    }
+
+    .intro-box p {
+        font-size: 1.1rem;
+    }
+}
+
+/*Map*/
+#map {
+    height: 650px;
+    width: 100%;
+}
+
+/* Button Styling */
+.map-controls {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+.map-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.map-controls button:hover {
+    background-color: #0056b3;
+}
+
+/*Payment*/
 .payment-container {
     width: 800px;
     margin: 50px auto;
@@ -1037,8 +1243,8 @@ input[type="text"] {
 
 .alert {
     display: flex;
-    align-items: center; /* Align icon and text vertically */
-    gap: 10px; /* Add space between the icon and text */
+    align-items: center;
+    gap: 10px;
     background-color: #ebfbee;
     padding: 10px;
     border-radius: 5px;
@@ -1053,8 +1259,8 @@ input[type="text"] {
     margin: 0; /* Remove margin */
 }
 .alert .icon {
-    flex-shrink: 0; /* Prevent the icon from shrinking */
-    display: flex; /* Center the icon */
+    flex-shrink: 0;
+    display: flex;
 }
 
 .something-terrible {
@@ -1092,6 +1298,7 @@ input[type="text"] {
     background-color: #c0c0c0;
 }
 
+/* Navigation bar */
 .welcome-text {
     background-color: #B6FF65;
     color: black;
@@ -1101,8 +1308,4 @@ input[type="text"] {
     text-align: center;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     display: inline-block;
-}
-
-.chat-icon {
-    height: 40px;
 }

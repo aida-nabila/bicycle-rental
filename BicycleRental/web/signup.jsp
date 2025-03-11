@@ -1,9 +1,3 @@
-<%-- 
-    Document   : signup
-    Created on : 28 Jan 2025, 11:22:13 pm
-    Author     : User
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -62,21 +56,21 @@
                     </div>
                 </div>
                 
-                <!-- Password Validation Message -->
-                <p id="passwordMessage" class="password-hint"></p>
-                
                 <!-- Checkbox to show/hide password -->
                 <div>
                     <label>
                         <input type="checkbox" id="showPassword" onclick="togglePasswordVisibility()"> Show password
                     </label>
                 </div>
-
+                
+                <!-- Password Validation Message -->
+                <p id="passwordMessage" class="password-hint"></p>
+                
                 <button type="submit" id="submitBtn">Sign Up</button>
 
             </form>
 
-            <p>Already have an Account? <a href="login.jsp">Log In</a></p>
+            <p>Already have an Account? <a href="login.jsp" class="login-text">Log In</a></p>
         </div>
 
         <jsp:include page="footer.jsp"/>
@@ -108,18 +102,47 @@
             var hasLetter = /[a-zA-Z]/.test(password);
             var hasNumber = /[0-9]/.test(password);
             var hasSymbol = /[\W_]/.test(password);
-
-            // Check if password meets all requirements
-            if (minLength && hasLetter && hasNumber && hasSymbol) {
-                message.style.color = "green";
-                message.textContent = "Strong password";
+            
+            // Hide message if password is empty
+            if (password.trim() === "") {
+                message.style.display = "none";
+                submitBtn.disabled = true;
+                return;
             } else {
-                message.style.color = "red";
-                message.textContent = "Use 8 or more characters with a mix of letters, numbers & symbols.";
+                message.style.display = "inline-block";
             }
 
+            // Check if passwords match
+            if (password !== confirmPassword && confirmPassword.trim() !== "") {
+                message.classList.remove("strong");
+                message.classList.add("error");
+                message.innerHTML = "❌ Passwords do not match.";
+                submitBtn.disabled = true;
+                return;
+            }
+
+            // Check if password meets all security requirements
+            if (minLength && hasLetter && hasNumber && hasSymbol) {
+                if (password === confirmPassword) {
+                    message.classList.add("strong");
+                    message.classList.remove("error");
+                    message.innerHTML = "✔ Strong password and passwords match.";
+                    submitBtn.disabled = false;
+                } else {
+                    message.classList.add("strong");
+                    message.classList.remove("error");
+                    message.innerHTML = "✔ Strong password.";
+                    submitBtn.disabled = true;
+                }
+            } else {
+                message.classList.remove("strong");
+                message.classList.remove("error");
+                message.innerHTML = "⚠ Use 8+ characters with letters, numbers & symbols.";
+                submitBtn.disabled = true;
+            }
+ 
             // Enable button only if conditions are met
             submitBtn.disabled = !(minLength && hasLetter && hasNumber && hasSymbol && password === confirmPassword);
         }
-    </script>
+        </script>
 </html>

@@ -12,6 +12,7 @@
     String userEmail = (String) request.getAttribute("userEmail");
     Integer userId = (Integer) request.getAttribute("userId");
 %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -30,6 +31,7 @@
         .return-btn-complete { background-color: grey; color: white; padding: 10px 15px; border: none; border-radius: 5px; }
         .cancel-btn { background-color: red; color: white; padding: 10px 15px; border: none; border-radius: 5px; }
     </style>
+
 </head>
 <body>
     <jsp:include page="headerver3.jsp"/>
@@ -97,7 +99,9 @@
                 <td><%= rental.getRentalStatus() %></td>
                 <td>
                     <% if ("Ongoing".equals(rental.getRentalStatus())) { %>
-                        <%= timerText %>
+                        <span id="timer_<%= rental.getId() %>" data-end-time="<%= rentalEnd %>">
+                            <%= timerText %>
+                        </span>
                     <% } else if ("Overdue".equals(rental.getRentalStatus()) && rental.getPenalty() > 0) { %>
                         Penalty: RM <%= rental.getPenalty() %>
                     <% } else if ("Completed".equals(rental.getRentalStatus()) && rental.getPenalty() > 0) { %>
@@ -106,12 +110,9 @@
                         No Penalty
                     <% } %>
                 </td>
-                                <td>
+                <td>
                     <% if ("Ongoing".equals(rental.getRentalStatus()) || "Overdue".equals(rental.getRentalStatus())) { %>
-                        <form action="ReturnRentalServlet" method="POST" onsubmit="return confirm('Are you sure you want to return the bicycle?');">
-                            <input type="hidden" name="rentalId" value="<%= rental.getId() %>">
-                            <button class="return-btn" type="submit">Return</button>
-                        </form>
+                    <button class="return-btn" type="button" onclick="confirmReturn('<%= rental.getId() %>', '<%= rental.getTagNo() %>')">Return</button>
                     <% } else if ("Upcoming".equals(rental.getRentalStatus())) { %>
                         <form action="CancelRentalServlet" method="POST" onsubmit="return confirmCancel();">
                             <input type="hidden" name="rentalId" value="<%= rental.getId() %>">
@@ -132,6 +133,114 @@
     </div>
 </body>
 <script>
+    function confirmReturn(rentalId, tagNo) {   
+        console.log("Rental ID Received:", rentalId);  // Debugging output
+        console.log("Tag No Received:", tagNo);        // Debugging output
+
+        if (!rentalId || rentalId === "null" || rentalId === "undefined") {
+            alert("Error: Rental ID is missing!");
+            return;
+        }
+    
+        if (confirm("Are you sure you want to return the bicycle?")) {
+            // Fetch available bike points dynamically from the database
+            fetch("GetBikePointsServlet")
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Bike Points Received:", data); // Debugging output
+
+                    // Create dropdown options
+                    let selectElement = document.createElement("select");
+                    selectElement.name = "returnLocation";
+                    selectElement.id = "returnLocation";
+                    selectElement.required = true;
+
+                    // Add an empty option as a placeholder
+                    let defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Choose Return Location";
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    selectElement.appendChild(defaultOption);
+
+                    // Append the fetched locations as options
+                    data.forEach(point => {
+                        let option = document.createElement("option");
+                        option.value = point;
+                        option.textContent = point;
+                        selectElement.appendChild(option);
+                    });
+
+                    // Show a popup form
+                    let popupDiv = document.createElement("div");
+                    popupDiv.id = "returnPopup";
+                    popupDiv.style = "position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%); background: white; padding: 20px; border-radius: 5px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000;";
+
+                    popupDiv.innerHTML = `
+                        <h2>Return Bicycle</h2>
+                        <form id="returnForm" action="ReturnRentalServlet" method="POST">
+                            <input type="hidden" name="rentalId" id="rentalIdInput" value="${rentalId}">
+                            <input type="hidden" name="tagNo" id="tagNoInput" value="${tagNo}">
+                            <label for="returnLocation">Choose Return Location:</label>
+                            
+                            <button type="button" onclick="closePopup()" style="
+                                margin-top: 10px;
+                                padding: 10px 15px; 
+                                border: none; 
+                                border-radius: 5px;
+                                cursor: pointer;
+                            ">Cancel</button>
+
+                            <button type="submit" id="confirmReturn" style="
+                                background-color: #B6FF65; 
+                                color: black; 
+                                margin-top: 10px;
+                                padding: 10px 15px; 
+                                border: none; 
+                                border-radius: 5px;
+                                cursor: pointer;
+                                margin-right: 10px;
+                            ">Confirm Return</button>
+                        </form>
+                    `;
+
+                    // Append the select element to the form
+                    popupDiv.querySelector("#returnForm").appendChild(selectElement);
+
+                    // Remove existing popup before appending a new one
+                    let existingPopup = document.getElementById("returnPopup");
+                    if (existingPopup) {
+                        existingPopup.remove();
+                    }
+
+                    document.body.appendChild(popupDiv);
+                    
+                    // **SET THE VALUES EXPLICITLY AFTER APPENDING TO DOM**
+                    document.getElementById("rentalIdInput").value = rentalId;
+                    document.getElementById("tagNoInput").value = tagNo;
+                    
+                    // **Force Refresh After Submission**
+                    document.getElementById("returnForm").addEventListener("submit", function() {
+                        setTimeout(() => {
+                            location.reload(true); // Hard refresh to fetch updated rental status
+                        }, 1000);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching bike points:", error);
+                    alert("Failed to load return locations.");
+                });
+        }
+    }
+
+    // Function to close the popup
+    function closePopup() {
+        let popup = document.getElementById("returnPopup");
+        if (popup) {
+            popup.remove();
+        }
+    }
+
     // Confirmation popup for the cancel button
     function confirmCancel() {
         return confirm("Are you sure you want to cancel this rental?");

@@ -19,43 +19,81 @@ import javax.servlet.http.HttpServletResponse;
 public class ReturnRentalServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int rentalId = Integer.parseInt(request.getParameter("rentalId"));
+        String rentalIdStr = request.getParameter("rentalId");
+        String returnLocation = request.getParameter("returnLocation");
+        String tagNo = request.getParameter("tagNo");
+
+        // Check if rentalId is missing or empty
+        if (rentalIdStr == null || rentalIdStr.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid rental ID");
+            return;
+        }
+
+        int rentalId = Integer.parseInt(rentalIdStr);
 
         Connection conn = null;
         PreparedStatement pstmtFetch = null;
-        PreparedStatement pstmtUpdate = null;
+        PreparedStatement pstmtUpdateRental = null;
+        PreparedStatement pstmtUpdateBike = null;
         ResultSet rs = null;
 
         try {
             conn = dbconn.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+            
+            // Fetch rental details to determine if it's overdue
             String fetchSql = "SELECT rental_date, rental_time, rental_hours, bicycle_id FROM bicycle_rentals WHERE rental_id = ?";
             pstmtFetch = conn.prepareStatement(fetchSql);
             pstmtFetch.setInt(1, rentalId);
             rs = pstmtFetch.executeQuery();
 
             if (rs.next()) {
-                LocalDateTime rentalEnd = LocalDateTime.parse(rs.getString(1) + " " + rs.getString(2), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).plusHours(rs.getInt(3));
-                double penalty = Math.max(0, Duration.between(rentalEnd, LocalDateTime.now()).toHours() - 1) + 2;
+                LocalDateTime rentalEnd = LocalDateTime.parse(
+                        rs.getString(1) + " " + rs.getString(2),
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                ).plusHours(rs.getInt(3));
 
-                String updateSql = "UPDATE bicycle_rentals SET rental_status = 'Completed', penalty = ? WHERE rental_id = ?";
-                pstmtUpdate = conn.prepareStatement(updateSql);
-                pstmtUpdate.setDouble(1, penalty);
-                pstmtUpdate.setInt(2, rentalId);
-                pstmtUpdate.executeUpdate();
+                LocalDateTime currentTime = LocalDateTime.now();
+                double penalty = 0;
+                
+                // Only apply RM2 penalty if the rental is overdue
+                if (currentTime.isAfter(rentalEnd)) {
+                    Duration overdueDuration = Duration.between(rentalEnd, currentTime);
+                    long overdueHours = overdueDuration.toHours();
+                    penalty = 2 + Math.max(0, overdueHours - 1); // RM2 initially, then RM1 per extra hour
+                }
+                
+                // Update rental status
+                String updateRentalSql = "UPDATE bicycle_rentals SET rental_status = 'Completed', penalty = ? WHERE rental_id = ?";
+                pstmtUpdateRental = conn.prepareStatement(updateRentalSql);
+                pstmtUpdateRental.setDouble(1, penalty);
+                pstmtUpdateRental.setInt(2, rentalId);
+                pstmtUpdateRental.executeUpdate();
+
+                // Update bicycle location and status
+                String updateBikeSql = "UPDATE bicycle SET location = ?, status = 'Available' WHERE tag_no = ?";
+                pstmtUpdateBike = conn.prepareStatement(updateBikeSql);
+                pstmtUpdateBike.setString(1, returnLocation);
+                pstmtUpdateBike.setString(2, tagNo);
+                pstmtUpdateBike.executeUpdate();
+                
+                conn.commit(); // Commit transaction immediately
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            // Close resources manually
             try {
                 if (rs != null) rs.close();
                 if (pstmtFetch != null) pstmtFetch.close();
-                if (pstmtUpdate != null) pstmtUpdate.close();
+                if (pstmtUpdateRental != null) pstmtUpdateRental.close();
+                if (pstmtUpdateBike != null) pstmtUpdateBike.close();
                 if (conn != null) conn.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
+
         response.sendRedirect("RentalServlet");
     }
 }
+

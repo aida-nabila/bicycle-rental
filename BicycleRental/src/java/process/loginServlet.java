@@ -1,6 +1,8 @@
 package process;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -33,7 +35,9 @@ public class loginServlet extends HttpServlet {
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
 
-                if (password.equals(storedPassword)) {
+                // Hash the input password and compare it with the stored hash
+                String hashedInputPassword = hashPassword(password);
+                if (hashedInputPassword.equals(storedPassword)) {
                     loginSuccess = true;
                 }
             }
@@ -48,6 +52,25 @@ public class loginServlet extends HttpServlet {
         } else {
             response.getWriter().println("<script>alert('Invalid email or password!');</script>");
             response.getWriter().println("<script>window.location.href='login.jsp';</script>");
+        }
+    }
+
+    /**
+     * Hashes a password using SHA-256 for comparison.
+     * @param password The input password.
+     * @return The hashed password in hexadecimal format.
+     */
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashedBytes) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error hashing password", e);
         }
     }
 }

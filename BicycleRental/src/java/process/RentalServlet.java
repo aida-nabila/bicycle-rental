@@ -32,6 +32,7 @@ public class RentalServlet extends HttpServlet {
         if (userEmail != null) {
             try (Connection conn = dbconn.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement("SELECT user_id FROM user WHERE email = ?")) {
+                conn.setAutoCommit(true);
                 pstmt.setString(1, userEmail);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -44,59 +45,74 @@ public class RentalServlet extends HttpServlet {
         }
 
         if (userId > 0) {
-            try (Connection conn = dbconn.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(
-                "SELECT br.rental_id, br.bicycle_id, b.bicycle_type, b.tag_no, br.rental_hours, br.rental_date, br.rental_time, " +
-                "br.created_at, br.penalty, br.rental_status, p.amount, p.payment_date " +
-                "FROM bicycle_rentals br " +
-                "JOIN bicycle b ON br.bicycle_id = b.bicycle_id " +
-                "LEFT JOIN payments p ON br.rental_id = p.rental_id " +
-                "WHERE br.user_id = ?")) {
+            try (Connection conn = dbconn.getConnection()) {
+                conn.setAutoCommit(false);
+
+                PreparedStatement pstmt = conn.prepareStatement(
+                    "SELECT br.rental_id, br.bicycle_id, b.bicycle_type, b.tag_no, br.rental_hours, " +
+                    "br.rental_date, br.rental_time, br.created_at, br.penalty, br.rental_status, " +
+                    "p.amount, p.payment_date FROM bicycle_rentals br " +
+                    "JOIN bicycle b ON br.bicycle_id = b.bicycle_id " +
+                    "LEFT JOIN payments p ON br.rental_id = p.rental_id " +
+                    "WHERE br.user_id = ?"
+                );
 
                 pstmt.setInt(1, userId);
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    while (rs.next()) {
-                        int rentalId = rs.getInt("rental_id");
-                        int bicycleId = rs.getInt("bicycle_id");
-                        String rentalDate = rs.getString("rental_date");
-                        String rentalTime = rs.getString("rental_time");
-                        String rentalStatus = rs.getString("rental_status");
+                ResultSet rs = pstmt.executeQuery();
 
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                        LocalDateTime rentalStartDateTime = LocalDateTime.parse(rentalDate + " " + rentalTime, formatter);
-                        LocalDateTime rentalEndDateTime = rentalStartDateTime.plusHours(rs.getInt("rental_hours"));
-                        LocalDateTime currentTime = LocalDateTime.now();
+                while (rs.next()) {
+                    int rentalId = rs.getInt("rental_id");
+                    int bicycleId = rs.getInt("bicycle_id");
+                    String rentalStatus = rs.getString("rental_status");
 
-                        double penalty = 0;
+                    String rentalDateTimeStr = rs.getString("rental_date") + " " + rs.getString("rental_time");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    LocalDateTime rentalStart = LocalDateTime.parse(rentalDateTimeStr, formatter);
+                    LocalDateTime rentalEnd = rentalStart.plusHours(rs.getInt("rental_hours"));
+                    LocalDateTime currentTime = LocalDateTime.now();
 
-                        // Calculate penalty for overdue rental
-                        if (currentTime.isAfter(rentalEndDateTime) && !"Completed".equals(rentalStatus)) {
-                            // Calculate overdue hours
-                            Duration overdueDuration = Duration.between(rentalEndDateTime, currentTime);
-                            long overdueHours = overdueDuration.toHours();
-                            penalty = 2 + Math.max(0, overdueHours - 1); // RM2 immediately, RM1 per additional hour
+                    double penalty = rs.getDouble("penalty");
 
-                            // Update penalty in the database
-                            updateRentalPenalty(rentalId, penalty);
-
-                            rentalStatus = "Overdue"; // Update status to Overdue
+                    // Always fetch the latest rental status from the database
+                    String fetchUpdatedStatus = "SELECT rental_status FROM bicycle_rentals WHERE rental_id = ?";
+                    try (PreparedStatement pstmtStatus = conn.prepareStatement(fetchUpdatedStatus)) {
+                        pstmtStatus.setInt(1, rentalId);
+                        try (ResultSet rsStatus = pstmtStatus.executeQuery()) {
+                            if (rsStatus.next()) {
+                                rentalStatus = rsStatus.getString("rental_status"); // Use the latest status
+                            }
                         }
-
-                        rentalList.add(new Rental(
-                                rentalId,
-                                rs.getString("bicycle_type"),
-                                rs.getString("tag_no"),
-                                rs.getInt("rental_hours"),
-                                rentalDate,
-                                rentalTime,
-                                rs.getString("created_at"),
-                                rs.getDouble("amount"),
-                                rs.getString("payment_date") != null ? rs.getString("payment_date") : "N/A",
-                                rentalStatus,
-                                rs.getDouble("penalty")
-                        ));
                     }
+                    
+                    if ("Upcoming".equals(rentalStatus) && currentTime.isAfter(rentalStart)) {
+                        rentalStatus = "Ongoing";
+                        updateRentalStatus(rentalId, "Ongoing", bicycleId, "In Use", conn);
+                    }
+
+                    if ("Overdue".equals(rentalStatus)) {
+                        Duration overdueDuration = Duration.between(rentalEnd, currentTime);
+                        long overdueHours = overdueDuration.toHours();
+                        penalty = 2 + Math.max(0, overdueHours - 1);
+                        updateRentalPenalty(rentalId, penalty, conn);
+                    }
+
+                    rentalList.add(new Rental(
+                        rentalId,
+                        rs.getString("bicycle_type"),
+                        rs.getString("tag_no"),
+                        rs.getInt("rental_hours"),
+                        rs.getString("rental_date"),
+                        rs.getString("rental_time"),
+                        rs.getString("created_at"),
+                        rs.getDouble("amount"),
+                        rs.getString("payment_date") != null ? rs.getString("payment_date") : "N/A",
+                        rentalStatus,
+                        penalty
+                    ));
                 }
+
+                conn.commit();
+
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -104,40 +120,49 @@ public class RentalServlet extends HttpServlet {
 
         request.setAttribute("userEmail", userEmail);
         request.setAttribute("userId", userId);
-        request.setAttribute("rentalList", rentalList);
+        request.removeAttribute("rentalList"); // Ensure old data is removed
+        request.setAttribute("rentalList", rentalList); // Fetch latest data
+
+        response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Expires", "0");
+
         request.getRequestDispatcher("rental.jsp").forward(request, response);
     }
-    
-        // Method to update penalty in the database
-    private void updateRentalPenalty(int rentalId, double penalty) {
-        try (Connection conn = dbconn.getConnection()) {
-            String updatePenaltySql = "UPDATE bicycle_rentals SET penalty = ? WHERE rental_id = ?";
-            try (PreparedStatement ps = conn.prepareStatement(updatePenaltySql)) {
-                ps.setDouble(1, penalty);
-                ps.setInt(2, rentalId);
-                ps.executeUpdate();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    private void updateRentalStatus(int rentalId, String rentalStatus, int bicycleId, String bicycleStatus) {
-        try (Connection conn = dbconn.getConnection()) {
-            // Update rental status in bicycle_rentals
-            try (PreparedStatement pstmt = conn.prepareStatement(
-                    "UPDATE bicycle_rentals SET rental_status = ? WHERE rental_id = ?")) {
+    // Update rental status & bicycle status
+    private void updateRentalStatus(int rentalId, String rentalStatus, int bicycleId, String bicycleStatus, Connection conn) {
+        try {
+            conn.setAutoCommit(false); // Start transaction
+        
+            // Update rental status
+            try (PreparedStatement pstmt = conn.prepareStatement("UPDATE bicycle_rentals SET rental_status = ? WHERE rental_id = ?")) {
                 pstmt.setString(1, rentalStatus);
                 pstmt.setInt(2, rentalId);
                 pstmt.executeUpdate();
             }
 
-            // Update bicycle status in bicycle table
-            try (PreparedStatement pstmt = conn.prepareStatement(
-                    "UPDATE bicycle SET status = ? WHERE bicycle_id = ?")) {
+            // Update bicycle status
+            try (PreparedStatement pstmt = conn.prepareStatement("UPDATE bicycle SET status = ? WHERE bicycle_id = ?")) {
                 pstmt.setString(1, bicycleStatus);
                 pstmt.setInt(2, bicycleId);
                 pstmt.executeUpdate();
+            }
+            
+            conn.commit(); // Commit transaction
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Update penalty 
+    private void updateRentalPenalty(int rentalId, double penalty, Connection conn) {
+        try {
+            String updatePenaltySql = "UPDATE bicycle_rentals SET penalty = ? WHERE rental_id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updatePenaltySql)) {
+                ps.setDouble(1, penalty);
+                ps.setInt(2, rentalId);
+                ps.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();
