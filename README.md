@@ -1,7 +1,7 @@
 # Bicycle Rental System
 
 ![homepage-bicycle-rental](https://github.com/user-attachments/assets/0f1c9cbe-76f1-4619-91c1-2995bc3b27b4)
-![map-bicycle-rental](https://github.com/user-attachments/assets/4613a54f-cb48-431e-9290-7b876afd891e)
+![map-bicycle-rental](https://github.com/user-attachments/assets/0b859b5e-a121-4601-b469-b0dffb661aab)
 
 ## Project Overview
 The **Bicycle Rental System** is a web-based application developed using **JSP (JavaServer Pages)**, running on **GlassFish Server**, with **MySQL (JDBC)** for database management. It is designed to **streamline the bicycle rental process**, providing a **user-friendly platform** for urban commuters, students, and tourists to rent bicycles conveniently.
