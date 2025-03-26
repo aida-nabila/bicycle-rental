@@ -56,7 +56,7 @@ BicycleRentalSystem/
   - Update dbconn.java with your MySQL credentials.
   - Deploy on GlassFish
 
-3. **Open NetBeans and load the project.**
+3. **Open NetBeans and load the project**
   - Configure the GlassFish server.
   - Run the project.
 
